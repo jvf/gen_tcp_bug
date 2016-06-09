@@ -10,10 +10,8 @@ start(NOAcceptors) ->
     [ spawn(?MODULE, accept_loop, [ListenSocket]) || _ <- lists:seq(1, NOAcceptors) ].
 
 accept_loop(LSock) ->
-    %% io:format("starting acceptor~n"),
     {ok, ASock} = gen_tcp:accept(LSock),
     {ok, {Ip, Port}} = inet:peername(ASock),
-    %% io:format("connection from ~w:~w~n", [Ip, Port]),
     ets:insert(accepted, {Port, Ip}),
     spawn(?MODULE, accept_loop, [LSock]),
     receive_loop(ASock).
@@ -21,7 +19,6 @@ accept_loop(LSock) ->
 receive_loop(Socket) ->
     receive
         {tcp, _S, "Ping"} ->
-            %% io:format("~w received Ping~n", [self()]),
             ok = gen_tcp:send(Socket, "Pong"),
             ok = inet:setopts(Socket, [{active, once}]),
             receive_loop(Socket);
